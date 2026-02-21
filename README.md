@@ -1,4 +1,4 @@
-# SmartMemoAI
+# NoteVault
 
 A full-stack note-taking web application with JWT-based authentication, user profiles, avatar uploads, and an admin dashboard.
 
