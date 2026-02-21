@@ -126,7 +126,7 @@ function SignUpPage() {
               <p className="text-sm text-destructive">{error}</p>
             )}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
               {isLoading ? (
                 <LoaderCircleIcon className="animate-spin" />
               ) : (
