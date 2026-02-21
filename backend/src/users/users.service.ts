@@ -40,6 +40,9 @@ export class UsersService {
         if (requestingUser.sub !== targetId && requestingUser.role !== Role.ADMIN) {
             throw new ForbiddenException('Insufficient permissions');
         }
+        if (updateUserDto.role !== undefined && requestingUser.role !== Role.ADMIN) {
+            delete updateUserDto.role;
+        }
         return this.usersRepository.updateUser(targetId, updateUserDto);
     }
 }

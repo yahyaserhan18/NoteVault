@@ -5,43 +5,7 @@ import { useCallback } from "react";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 function useNotesAPI() {
-    const { accessToken, refreshTokens } = useAuthContext();
-
-    /**
-     * Wrapper around fetch that:
-     * 1. Attaches the current access token as a Bearer header.
-     * 2. On a 401 response, silently refreshes the token pair and retries once.
-     * 3. Returns null if there is no token or the retry also fails.
-     */
-    const authFetch = useCallback(async (
-        url: string,
-        options: RequestInit = {},
-    ): Promise<Response | null> => {
-        if (!accessToken) {
-            console.error("No access token available");
-            return null;
-        }
-
-        const makeRequest = (token: string) =>
-            fetch(url, {
-                ...options,
-                headers: {
-                    "Content-Type": "application/json",
-                    ...options.headers,
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-        let response = await makeRequest(accessToken);
-
-        if (response.status === 401) {
-            const newToken = await refreshTokens();
-            if (!newToken) return null;
-            response = await makeRequest(newToken);
-        }
-
-        return response;
-    }, [accessToken, refreshTokens]);
+    const { authFetch } = useAuthContext();
 
     const getAllNotes = useCallback(async (): Promise<Note[]> => {
         const response = await authFetch(`${API_BASE_URL}/api/notes`);

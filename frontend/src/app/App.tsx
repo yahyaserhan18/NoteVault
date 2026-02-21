@@ -7,6 +7,7 @@ import SignInPage from "@/app/pages/SignInPage"
 import SignUpPage from "@/app/pages/SignUpPage"
 import NoteDetailPage from "@/app/pages/NoteDetailPage"
 import AccountPage from "@/app/pages/AccountPage"
+import DashboardPage from "@/app/pages/DashboardPage"
 import ProtectedRoute from "@/components/common/ProtectedRoute"
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/notes/:id" element={<NoteDetailPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
 
           <Route path="*" element={<NotFoundPage />} />
         </Route>

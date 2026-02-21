@@ -50,6 +50,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   refreshTokens: () => Promise<string | null>;
   updateUser: (data: UpdateUserData) => Promise<void>;
+  authFetch: (url: string, options?: RequestInit) => Promise<Response | null>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -180,28 +181,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearSession();
   }, [clearSession]);
 
-  const updateUser = useCallback(
-    async (data: UpdateUserData): Promise<void> => {
-      if (!user || !accessToken) throw new Error('Not authenticated');
-      const res = await fetch(`${API_BASE_URL}/api/users/${user.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(data),
-      });
-      const body = await res.json();
-      if (!res.ok || !body.ok) {
-        throw new Error(extractErrorMessage(body));
-      }
-      if (body.data) {
-        setUser(body.data as User);
-      }
-    },
-    [user, accessToken],
-  );
-
   const refreshTokens = useCallback(async (): Promise<string | null> => {
     const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
     if (!storedRefreshToken) return null;
@@ -223,6 +202,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [setSession, clearSession]);
 
+  const authFetch = useCallback(
+    async (url: string, options: RequestInit = {}): Promise<Response | null> => {
+      if (!accessToken) return null;
+
+      const makeRequest = (token: string) =>
+        fetch(url, {
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            ...options.headers,
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+      let response = await makeRequest(accessToken);
+
+      if (response.status === 401) {
+        const newToken = await refreshTokens();
+        if (!newToken) return null;
+        response = await makeRequest(newToken);
+      }
+
+      return response;
+    },
+    [accessToken, refreshTokens],
+  );
+
+  const updateUser = useCallback(
+    async (data: UpdateUserData): Promise<void> => {
+      if (!user) throw new Error('Not authenticated');
+      const res = await authFetch(`${API_BASE_URL}/api/users/${user.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+      if (!res) throw new Error('Not authenticated');
+      const body = await res.json();
+      if (!res.ok || !body.ok) {
+        throw new Error(extractErrorMessage(body));
+      }
+      if (body.data) {
+        setUser(body.data as User);
+      }
+    },
+    [user, authFetch],
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -235,6 +260,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         refreshTokens,
         updateUser,
+        authFetch,
       }}
     >
       {children}

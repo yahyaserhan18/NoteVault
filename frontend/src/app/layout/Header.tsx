@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { LogOutIcon, SettingsIcon } from "lucide-react"
+import { LayoutDashboardIcon, LogOutIcon, SettingsIcon, ShieldIcon } from "lucide-react"
 
 function UserAvatar({ firstName, lastName, avatarUrl }: { firstName: string; lastName: string; avatarUrl: string | null }) {
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
@@ -53,6 +53,15 @@ export function Header() {
             <span className="hidden text-xs text-muted-foreground sm:inline">
               Smart Notes With Ai
             </span>
+            {user?.role === "ADMIN" && (
+              <Link
+                to="/dashboard"
+                className="hidden items-center gap-1 rounded-lg bg-violet-100 px-2.5 py-1 text-xs font-medium text-violet-700 transition-colors hover:bg-violet-200 sm:inline-flex"
+              >
+                <ShieldIcon className="size-3" />
+                Dashboard
+              </Link>
+            )}
           </div>
 
           {user && (
@@ -87,6 +96,12 @@ export function Header() {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuGroup>
+                  {user.role === "ADMIN" && (
+                    <DropdownMenuItem onSelect={() => navigate("/dashboard")}>
+                      <LayoutDashboardIcon />
+                      Dashboard
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onSelect={() => navigate("/account")}>
                     <SettingsIcon />
                     Manage your account

@@ -80,6 +80,7 @@ export class UsersRepository {
                 ...(updateUserDto.lastName !== undefined && { lastName: updateUserDto.lastName }),
                 ...(updateUserDto.avatarUrl !== undefined && { avatarUrl: updateUserDto.avatarUrl ?? null }),
                 ...(updateUserDto.bio !== undefined && { bio: updateUserDto.bio ?? null }),
+                ...(updateUserDto.role !== undefined && { role: updateUserDto.role }),
             },
             select: userResponseSelect,
         });

@@ -41,7 +41,7 @@ export function SignInPage() {
         </div>
 
         <GlassCard className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on" method="post">
 
             <div className="space-y-1">
               <label htmlFor="email" className="text-sm font-medium">
@@ -50,8 +50,9 @@ export function SignInPage() {
               <Input
                 id="email"
                 type="email"
+                name="email"
                 placeholder="you@example.com"
-                autoComplete="email"
+                autoComplete="username"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -65,6 +66,7 @@ export function SignInPage() {
               <Input
                 id="password"
                 type="password"
+                name="password"
                 placeholder="••••••••"
                 autoComplete="current-password"
                 required

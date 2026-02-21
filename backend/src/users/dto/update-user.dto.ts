@@ -1,6 +1,11 @@
-import { IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
+import { Role } from '../../commen/enums/role.enum';
 
 export class UpdateUserDto {
+    @IsOptional()
+    @IsEnum(Role)
+    role?: Role;
+
     @IsOptional()
     @IsString()
     @MaxLength(100)
