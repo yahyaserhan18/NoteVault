@@ -1,23 +1,38 @@
 # SmartMemoAI
 
-A full-stack note-taking web application with JWT-based authentication, user profiles, and avatar uploads.
+A full-stack note-taking web application with JWT-based authentication, user profiles, avatar uploads, and an admin dashboard.
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS v4, Radix UI |
-| Backend | NestJS 11, TypeScript, Prisma ORM |
+| Frontend | React 19, TypeScript, Vite 7, Tailwind CSS v4, shadcn/ui (Radix UI), Lucide React, Sonner |
+| Backend | NestJS 11, TypeScript, Prisma ORM 7 |
 | Database | PostgreSQL |
-| Auth | JWT (access + refresh token rotation) |
+| Auth | JWT (access + refresh token rotation), Passport.js |
 | Container | Docker Compose |
 
 ## Project Structure
 
 ```
 SmartMemoAI/
-├── frontend/         # React + Vite SPA
-├── backend/          # NestJS REST API
+├── frontend/               # React + Vite SPA
+│   └── src/
+│       ├── app/            # Pages and layout
+│       ├── components/     # UI (shadcn/ui), common, and note components
+│       ├── context/        # AuthContext
+│       ├── hooks/          # useNotesApi, useAutoSave
+│       ├── lib/            # Utilities
+│       └── types/          # TypeScript types
+├── backend/                # NestJS REST API
+│   └── src/
+│       ├── auth/           # Guards, strategies, decorators, DTOs
+│       ├── users/          # User CRUD + repository
+│       ├── notes/          # Note CRUD + repository
+│       ├── upload/         # Avatar upload (Multer)
+│       ├── prisma/         # Prisma client module
+│       ├── config/         # Env validation (Joi)
+│       └── commen/         # Filters, interceptors, enums
 ├── docker-compose.yml
 └── .gitignore
 ```
@@ -30,7 +45,10 @@ SmartMemoAI/
 - **User profiles** — Each account has a first name, last name, bio, and an optional avatar.
 - **Avatar upload** — Upload a profile image (JPEG, PNG, GIF, WebP — max 5 MB). Images are stored on disk and served as static files under `/uploads/avatars/`.
 - **Role-based access** — Users have a `USER` or `ADMIN` role stored in the JWT payload.
+- **Admin dashboard** — Admins can view all registered users, edit their roles, and delete accounts from a dedicated dashboard page.
 - **Protected routes** — All app routes require authentication; unauthenticated users are redirected to `/sign-in`.
+- **Toast notifications** — User-facing success and error messages via Sonner.
+- **Glassmorphism UI** — Modern frosted-glass card design throughout the interface.
 
 ## Prerequisites
 
@@ -76,7 +94,7 @@ The app will be available at `http://localhost:5173`.
 
 ## Environment Variables
 
-All required variables are documented in `backend/.env.example`:
+### Backend — `backend/.env.example`
 
 | Variable | Description |
 |---|---|
@@ -86,6 +104,12 @@ All required variables are documented in `backend/.env.example`:
 | `JWT_ACCESS_EXPIRY` | Access token lifetime (e.g. `15m`) |
 | `JWT_REFRESH_SECRET` | Secret for signing refresh tokens (min 32 chars) |
 | `JWT_REFRESH_EXPIRY` | Refresh token lifetime (e.g. `7d`) |
+
+### Frontend — `frontend/.env`
+
+| Variable | Description |
+|---|---|
+| `VITE_API_BASE_URL` | Backend API URL (default: `http://localhost:3000`) |
 
 ## API Endpoints
 
@@ -101,9 +125,11 @@ All required variables are documented in `backend/.env.example`:
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
+| `GET` | `/` | ADMIN | List all users |
 | `POST` | `/` | — | Register a new account |
 | `GET` | `/:id` | JWT | Get a user profile |
 | `PATCH` | `/:id` | JWT | Update profile (name, bio, avatarUrl) |
+| `DELETE` | `/:id` | ADMIN | Delete a user account |
 
 ### Notes — `/api/notes`
 
@@ -130,20 +156,22 @@ User
   notes[], refreshTokens[]
 
 Note
-  id, title, content
+  id, title, content, createdAt, updatedAt
   userId → User
 
 RefreshToken
-  id, tokenHash, expiresAt
+  id, tokenHash, expiresAt, createdAt
   userId → User
 ```
 
 ## Frontend Pages
 
-| Route | Page |
-|---|---|
-| `/sign-in` | Sign in |
-| `/sign-up` | Register |
-| `/` | Home — note list |
-| `/notes/:id` | Note editor |
-| `/account` | Profile settings |
+| Route | Page | Access |
+|---|---|---|
+| `/sign-in` | Sign in | Public |
+| `/sign-up` | Register | Public |
+| `/` | Home — note list | Authenticated |
+| `/notes/:id` | Note editor | Authenticated |
+| `/account` | Profile settings | Authenticated |
+| `/dashboard` | Admin dashboard | Admin only |
+| `*` | 404 Not Found | Authenticated |
