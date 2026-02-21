@@ -2,6 +2,10 @@
 
 A full-stack note-taking web application with JWT-based authentication, user profiles, avatar uploads, and an admin dashboard.
 
+## Demo
+
+[![Watch the demo](https://img.youtube.com/vi/5ZZVhPqCV4E/maxresdefault.jpg)](https://youtu.be/5ZZVhPqCV4E)
+
 ## Tech Stack
 
 | Layer | Technology |
